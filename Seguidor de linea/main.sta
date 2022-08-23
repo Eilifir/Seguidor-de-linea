@@ -1,0 +1,44 @@
+
+ROM used: 294 (1%)
+          294 (1%) including unused fragments
+
+          1 Average locations per line
+          8 Average locations per statement
+
+RAM used: 13 (1%) at main() level
+          17 (1%) worst case
+
+Stack used: 1 worst case (out of 31 total available)
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+   65    38 100  main.c
+   34     0   0  main.h
+  409     0   0  D:\PICC\devices\18F2550.h
+----- -----
+  508    38 Total
+
+Page ROM  %  RAM   Vol Diff  Functions:
+---- --- --- ---   --- ----  ----------
+0     62  11   6   318  3.7  @WRITEBITA
+0    228  39   0   318  3.7  MAIN
+
+Program metrics:
+    Functions               2
+    Statements              38
+    Comments                99
+    Volume (V)              760
+    Difficilty (D)          7.4
+    Effort to implement (E) 5630
+    Time to implement (T)   5 minutes
+    Est Delivered Bugs (B)  0
+    Cyclomatic Complexity   6
+    Maintainability (MI)    42
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00002     4  0  
+00004-07FFE   290  32474  
+
+
+

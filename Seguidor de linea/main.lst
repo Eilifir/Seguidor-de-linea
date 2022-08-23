@@ -1,0 +1,219 @@
+CCS PCH C Compiler, Version 4.114, 93460303               23-ago.-22 18:37
+
+               Filename: C:\Users\Federico\Desktop\Estudio\Programacion\Seguidor de linea\main.lst
+
+               ROM used: 294 bytes (1%)
+                         Largest free fragment is 32474
+               RAM used: 13 (1%) at main() level
+                         17 (1%) worst case
+               Stack:    1 locations
+
+*
+0000:  GOTO   0042
+.................... #include <main.h> 
+.................... #include <18F2550.h> 
+.................... //////// Standard Header file for the PIC18F2550 device //////////////// 
+.................... #device PIC18F2550 
+.................... #list 
+....................  
+....................  
+.................... #FUSES NOWDT                 	//No Watch Dog Timer 
+.................... #FUSES WDT128                	//Watch Dog Timer uses 1:128 Postscale 
+.................... #FUSES PLL1                  	//No PLL PreScaler 
+.................... #FUSES CPUDIV4               	//System Clock by 4 
+.................... #FUSES USBDIV                	//USB clock source comes from PLL divide by 2 
+.................... #FUSES XT                    	//Crystal osc <= 4mhz for PCM/PCH , 3mhz to 10 mhz for PCD 
+.................... #FUSES FCMEN                 	//Fail-safe clock monitor enabled 
+.................... #FUSES IESO                  	//Internal External Switch Over mode enabled 
+.................... #FUSES NOPUT                 	//No Power Up Timer 
+.................... #FUSES NOBROWNOUT            	//No brownout reset 
+.................... #FUSES BORV20                	//Brownout reset at 2.0V 
+.................... #FUSES NOVREGEN              	//USB voltage regulator disabled 
+.................... #FUSES PBADEN                	//PORTB pins are configured as analog input channels on RESET 
+.................... #FUSES NOLPT1OSC             	//Timer1 configured for higher power operation 
+.................... #FUSES MCLR                  	//Master Clear pin enabled 
+.................... #FUSES STVREN                	//Stack full/underflow will cause reset 
+.................... #FUSES NOLVP                 	//No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+.................... #FUSES NOXINST               	//Extended set extension and Indexed Addressing mode disabled (Legacy mode) 
+.................... #FUSES NODEBUG               	//No Debug mode for ICD 
+.................... #FUSES NOPROTECT             	//Code not protected from reading 
+.................... #FUSES NOCPB                 	//No Boot Block code protection 
+.................... #FUSES NOCPD                 	//No EE protection 
+.................... #FUSES WRT                   	//Program Memory Write Protected 
+.................... #FUSES NOWRTC                	//configuration not registers write protected 
+.................... #FUSES NOWRTB                	//Boot block not write protected 
+.................... #FUSES NOWRTD                	//Data EEPROM not write protected 
+.................... #FUSES NOEBTR                	//Memory not protected from table reads 
+.................... #FUSES NOEBTRB               	//Boot block not protected from table reads 
+....................  
+.................... #use delay(crystal=4000000,  clock=1000000) 
+....................  
+....................  
+.................... #int_RB 
+.................... int boton_de_inicio  = input_state(PIN_A0); 
+.................... int motor_Derecho    = PIN_B0; 
+.................... int inversa_derecha  = PIN_B1; 
+.................... int motor_Izquierdo  = PIN_B2; 
+.................... int inversa_izquierda= PIN_B3; 
+.................... int Sensor_Derecho   = input_state(PIN_B4); 
+.................... int Sensor_Izquierdo = input_state(PIN_B5) + 1;  
+.................... int sensores = Sensor_derecho + Sensor_Izquierdo; 
+.................... int on_off = 0; 
+.................... void  RB_isr(void)  
+.................... { 
+....................    switch(sensores){ 
+....................    case 1: 
+....................       while(Sensor_Derecho == 1){ 
+....................       output_low(motor_Izquierdo); 
+....................       } 
+....................       output_high(motor_Izquierdo); 
+....................       break; 
+....................    case 2: 
+....................       while(Sensor_Derecho == 1){ 
+....................       output_low(motor_Derecho); 
+....................       } 
+....................       output_high(motor_Derecho); 
+....................       break; 
+....................    case 3: 
+....................       while(Sensor_Derecho == 1 && Sensor_Izquierdo == 1){ 
+....................       output_low(motor_Derecho); 
+....................       output_low(motor_Izquierdo); 
+....................       output_high(inversa_derecha); 
+....................       output_high(inversa_izquierda); 
+....................       } 
+....................       output_low(inversa_derecha); 
+....................       output_low(inversa_izquierda); 
+....................       output_high(motor_Derecho); 
+....................       output_high(motor_Izquierdo); 
+....................    }       
+.................... } 
+....................  
+....................  
+....................  
+.................... void main() 
+.................... { 
+*
+0042:  CLRF   FF8
+0044:  BCF    FD0.7
+0046:  CLRF   FEA
+0048:  CLRF   FE9
+*
+0050:  MOVLW  08
+0052:  MOVWF  05
+0054:  MOVLW  09
+0056:  MOVWF  06
+0058:  MOVLW  0A
+005A:  MOVWF  07
+005C:  MOVLW  0B
+005E:  MOVWF  08
+*
+0074:  CLRF   0C
+0076:  MOVF   FC1,W
+0078:  ANDLW  C0
+007A:  IORLW  0F
+007C:  MOVWF  FC1
+007E:  MOVLW  07
+0080:  MOVWF  FB4
+....................  
+....................    setup_timer_3(T3_DISABLED|T3_DIV_BY_1); 
+0082:  CLRF   FB1
+....................    enable_interrupts(INT_RB); 
+0084:  BSF    FF2.3
+....................    enable_interrupts(GLOBAL); 
+0086:  MOVLW  C0
+0088:  IORWF  FF2,F
+....................      if(boton_de_inicio == 1){ 
+008A:  DECFSZ 04,W
+008C:  BRA    009A
+....................       if(on_off == 1){ 
+008E:  DECFSZ 0C,W
+0090:  BRA    0096
+....................       on_off = 0; 
+0092:  CLRF   0C
+....................       }else{ 
+0094:  BRA    009A
+....................       on_off = 1; 
+0096:  MOVLW  01
+0098:  MOVWF  0C
+....................       } 
+....................    } 
+....................    if(on_off == 1){ 
+009A:  DECFSZ 0C,W
+009C:  BRA    00E4
+....................    output_high(motor_derecho); 
+009E:  MOVFF  05,0D
+00A2:  MOVLW  01
+00A4:  MOVWF  0E
+00A6:  MOVLW  0F
+00A8:  MOVWF  10
+00AA:  MOVLW  89
+00AC:  MOVWF  0F
+00AE:  RCALL  0004
+00B0:  MOVFF  05,0D
+00B4:  CLRF   0E
+00B6:  MOVLW  0F
+00B8:  MOVWF  10
+00BA:  MOVLW  92
+00BC:  MOVWF  0F
+00BE:  RCALL  0004
+....................    output_high(motor_izquierdo); 
+00C0:  MOVFF  07,0D
+00C4:  MOVLW  01
+00C6:  MOVWF  0E
+00C8:  MOVLW  0F
+00CA:  MOVWF  10
+00CC:  MOVLW  89
+00CE:  MOVWF  0F
+00D0:  RCALL  0004
+00D2:  MOVFF  07,0D
+00D6:  CLRF   0E
+00D8:  MOVLW  0F
+00DA:  MOVWF  10
+00DC:  MOVLW  92
+00DE:  MOVWF  0F
+00E0:  RCALL  0004
+....................    }else{ 
+00E2:  BRA    0124
+....................    output_low(motor_derecho); 
+00E4:  MOVFF  05,0D
+00E8:  CLRF   0E
+00EA:  MOVLW  0F
+00EC:  MOVWF  10
+00EE:  MOVLW  89
+00F0:  MOVWF  0F
+00F2:  RCALL  0004
+00F4:  MOVFF  05,0D
+00F8:  CLRF   0E
+00FA:  MOVLW  0F
+00FC:  MOVWF  10
+00FE:  MOVLW  92
+0100:  MOVWF  0F
+0102:  RCALL  0004
+....................    output_low(motor_izquierdo); 
+0104:  MOVFF  07,0D
+0108:  CLRF   0E
+010A:  MOVLW  0F
+010C:  MOVWF  10
+010E:  MOVLW  89
+0110:  MOVWF  0F
+0112:  RCALL  0004
+0114:  MOVFF  07,0D
+0118:  CLRF   0E
+011A:  MOVLW  0F
+011C:  MOVWF  10
+011E:  MOVLW  92
+0120:  MOVWF  0F
+0122:  RCALL  0004
+....................    } 
+....................  
+.................... } 
+0124:  SLEEP 
+
+Configuration Fuses:
+   Word  1: C038   PLL1 CPUDIV4 USBDIV XT FCMEN IESO
+   Word  2: 0E19   NOPUT NOBROWNOUT BORV20 NOVREGEN NOWDT WDT128
+   Word  3: 8300   CCP2C1 PBADEN NOLPT1OSC MCLR
+   Word  4: 0081   STVREN NOLVP NOXINST NODEBUG
+   Word  5: C00F   NOPROTECT NOCPB NOCPD
+   Word  6: E000   WRT NOWRTC NOWRTB NOWRTD
+   Word  7: 400F   NOEBTR NOEBTRB
